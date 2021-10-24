@@ -1,0 +1,50 @@
+version: "3.6"
+services:
+ discovery:
+  build: D:\Users\Youssef\eclipse-workspace\Discovery-server
+  ports:
+   - "8761:8761"
+  image: "discovery-service"
+ config:
+  build: D:\Users\Youssef\eclipse-workspace\config-server
+  command: --spring.profiles.active=native --spring.cloud.config.server.native.searchLocations=/config
+  environment:
+   - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+   - spring.profiles.active=native
+  ports:
+   - "8888:8888"
+  image: "config-server"
+  depends_on:
+      - discovery
+ Candidat_B:
+  build: D:\Users\Youssef\eclipse-workspace\Candidat
+  environment:
+   - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+   - spring.cloud.config.uri=http://config:8888
+  ports:
+   - "3000:8089"
+  image: "candidat-service"
+  depends_on:
+      - discovery
+      - config
+ Candidat_C:
+  build: D:\Users\Youssef\eclipse-workspace\Candidat
+  environment:
+   - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+   - spring.cloud.config.uri=http://config:8888
+  ports:
+   - "3001:8089"
+  image: "candidat-service"
+  depends_on:
+      - discovery
+      - config
+ gateway:
+   build: D:\Users\Youssef\eclipse-workspace\Zuul-Gateway
+   environment: 
+     - eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka/
+   ports:
+     - "8762:8762"
+   image: "gateway-server"
+   depends_on:
+      - discovery
+      - config
